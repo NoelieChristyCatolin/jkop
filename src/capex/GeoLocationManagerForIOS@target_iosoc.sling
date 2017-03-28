@@ -1,3 +1,4 @@
+
 /*
 * This file is part of Jkop
 * Copyright (c) 2016-2017 Job and Esther Technologies, Inc.
@@ -25,8 +26,7 @@ class  is GeoLocationManager imports cape:
 
 
 IFDEF("target_iosoc") {
-	depend "plist: {\"UIRequiredDeviceCapabilities\"} : {\"location-services\"} : {\"gps\"} : {\"NSLocationWhenInUseUsageDescription \"}"
-	depend "plist: { \"NSLocationWhenInUseUsageDescription\" } : { \"UIRequiredDeviceCapabilities\"}"
+	depend "plist: {\"UIRequiredDeviceCapabilities\"} : {\"NSLocationWhenInUseUsageDescription\"} : {\"NSLocationUsageDescription\"}"
 	depend "objc-header-m:<CoreLocation/CoreLocation.h>"
 }
 
@@ -74,3 +74,20 @@ func stopLocationUpdates override
 		[locationManager stopUpdatingLocation];
 	}}}
 }
+
+func getLastLocation(callback as function<void, GeoLocation, Error>) override
+{
+	var loc as GeoLocation
+	lang "objc" {{{
+		- (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations {
+			NSLOG(@"********************************");
+			// NSLOG(locations);
+			CLLocation* location = [locations lastObject];
+			NSLOG(@"LATITUDE : %f \n", location.coordinate.latitude);
+			loc.setLatitude(location.coordinate.latitude);
+			loc.setLongitude(location.coordinate.longitude);
+		}
+	}}}
+	callback(loc, null)
+}
+
